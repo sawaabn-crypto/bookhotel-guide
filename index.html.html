@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全国ブックホテルガイド｜本とホテルとわたし時間</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;500;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1410;
+    --paper: #f7f3ec;
+    --paper-dark: #ede8de;
+    --accent: #8b5e3c;
+    --accent-light: #c49a6c;
+    --accent-pale: #f0e6d8;
+    --muted: #6b5c4e;
+    --rule: #d4c9b8;
+    --visited: #5c8a6e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: 'Noto Serif JP', serif; font-size: 15px; line-height: 1.8; }
+
+  header {
+    background: var(--ink); color: var(--paper);
+    padding: 48px 24px 36px; text-align: center; position: relative; overflow: hidden;
+  }
+  header::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, transparent, transparent 30px, rgba(255,255,255,0.015) 30px, rgba(255,255,255,0.015) 31px);
+  }
+  .header-label { font-family: 'Lato', sans-serif; font-size: 11px; letter-spacing: 0.25em; color: var(--accent-light); margin-bottom: 12px; text-transform: uppercase; }
+  header h1 { font-family: 'Shippori Mincho', serif; font-size: clamp(22px, 5vw, 36px); font-weight: 700; letter-spacing: 0.05em; line-height: 1.4; margin-bottom: 14px; }
+  header p { font-size: 13px; color: #b8a898; max-width: 480px; margin: 0 auto; line-height: 1.9; }
+
+  .filters-wrap {
+    background: var(--paper-dark); border-bottom: 1px solid var(--rule);
+    padding: 18px 20px; position: sticky; top: 0; z-index: 100;
+  }
+  .filters { max-width: 1000px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .filter-label { font-size: 11px; letter-spacing: 0.1em; color: var(--muted); margin-right: 4px; font-family: 'Lato', sans-serif; }
+  .filter-btn {
+    font-family: 'Noto Serif JP', serif; font-size: 12px; padding: 5px 14px;
+    border: 1px solid var(--rule); border-radius: 2px; background: var(--paper);
+    color: var(--muted); cursor: pointer; transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+  .filter-divider { width: 1px; height: 20px; background: var(--rule); margin: 0 4px; }
+
+  .count-bar { max-width: 1000px; margin: 0 auto; padding: 20px 20px 8px; font-size: 12px; color: var(--muted); font-family: 'Lato', sans-serif; }
+  #hotel-count { color: var(--accent); font-weight: bold; }
+
+  .notice { background: var(--accent-pale); border-left: 3px solid var(--accent-light); padding: 12px 16px; font-size: 12px; color: var(--muted); max-width: 1000px; margin: 16px auto 0; }
+
+  .region-section { max-width: 1000px; margin: 0 auto; padding: 8px 20px 32px; }
+  .region-title { font-family: 'Shippori Mincho', serif; font-size: 18px; color: var(--accent); padding: 16px 0 10px; border-bottom: 1px solid var(--rule); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .region-title::before { content: ''; width: 4px; height: 18px; background: var(--accent); display: block; border-radius: 2px; }
+
+  .hotel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; }
+
+  .hotel-card { background: white; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
+  .hotel-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(26,20,16,0.1); }
+  .hotel-card.visited-card { border-color: var(--visited); }
+  .visited-badge { position: absolute; top: 10px; right: 10px; background: var(--visited); color: white; font-family: 'Lato', sans-serif; font-size: 10px; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 2px; z-index: 2; }
+
+  .card-img-placeholder { width: 100%; height: 150px; display: flex; align-items: center; justify-content: center; font-size: 38px; background: linear-gradient(135deg, var(--paper-dark) 0%, var(--accent-pale) 100%); }
+
+  .card-body { padding: 16px; }
+  .card-type-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .tag { font-family: 'Lato', sans-serif; font-size: 10px; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 2px; text-transform: uppercase; }
+  .tag-type { background: var(--paper-dark); color: var(--muted); border: 1px solid var(--rule); }
+  .tag-solo { background: rgba(107,127,160,0.12); color: #6b7fa0; border: 1px solid rgba(107,127,160,0.3); }
+  .tag-couple { background: rgba(160,112,128,0.12); color: #a07080; border: 1px solid rgba(160,112,128,0.3); }
+  .tag-family { background: rgba(122,158,126,0.12); color: #7a9e7e; border: 1px solid rgba(122,158,126,0.3); }
+
+  .card-name { font-family: 'Shippori Mincho', serif; font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 3px; line-height: 1.5; }
+  .card-location { font-family: 'Lato', sans-serif; font-size: 11px; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 6px; }
+  .card-price { font-family: 'Lato', sans-serif; font-size: 12px; color: var(--accent); margin-bottom: 4px; }
+  .card-price span { font-size: 10px; color: var(--muted); }
+  .card-books { font-family: 'Lato', sans-serif; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+  .card-memo { font-size: 12px; color: var(--muted); line-height: 1.75; border-top: 1px solid var(--rule); padding-top: 10px; margin-top: 6px; }
+
+  .card-links { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .card-link { font-family: 'Lato', sans-serif; font-size: 11px; letter-spacing: 0.06em; color: var(--accent); text-decoration: none; border: 1px solid var(--accent-light); padding: 4px 10px; border-radius: 2px; transition: all 0.2s; }
+  .card-link:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  .card-link.yt { color: #c0392b; border-color: rgba(192,57,43,0.3); }
+  .card-link.yt:hover { background: #c0392b; color: white; border-color: #c0392b; }
+
+  .hotel-card.hidden, .region-section.hidden { display: none; }
+
+  footer { text-align: center; padding: 40px 20px; border-top: 1px solid var(--rule); background: var(--ink); color: #7a6e64; font-size: 12px; font-family: 'Lato', sans-serif; letter-spacing: 0.05em; margin-top: 40px; }
+  footer a { color: var(--accent-light); text-decoration: none; }
+  .footer-title { font-family: 'Shippori Mincho', serif; font-size: 16px; color: var(--paper); margin-bottom: 8px; }
+
+  @media (max-width: 600px) { .hotel-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">Book Hotel Guide Japan</div>
+  <h1>全国ブックホテルガイド</h1>
+  <p>本とホテルとわたし時間 ― さわあやが実際に泊まり、調べた<br>全国のブックホテルをまとめたパーソナルガイド。</p>
+</header>
+
+<div class="filters-wrap">
+  <div class="filters">
+    <span class="filter-label">エリア</span>
+    <button class="filter-btn active" data-filter="region" data-value="all">すべて</button>
+    <button class="filter-btn" data-filter="region" data-value="北海道・東北">北海道・東北</button>
+    <button class="filter-btn" data-filter="region" data-value="関東">関東</button>
+    <button class="filter-btn" data-filter="region" data-value="中部・北陸">中部・北陸</button>
+    <button class="filter-btn" data-filter="region" data-value="関西">関西</button>
+    <button class="filter-btn" data-filter="region" data-value="中国・四国">中国・四国</button>
+    <button class="filter-btn" data-filter="region" data-value="九州・沖縄">九州・沖縄</button>
+    <div class="filter-divider"></div>
+    <span class="filter-label">スタイル</span>
+    <button class="filter-btn" data-filter="style" data-value="solo">一人旅</button>
+    <button class="filter-btn" data-filter="style" data-value="couple">カップル</button>
+    <button class="filter-btn" data-filter="style" data-value="family">家族</button>
+    <div class="filter-divider"></div>
+    <button class="filter-btn" data-filter="visited" data-value="visited">訪問済みのみ</button>
+  </div>
+</div>
+
+<div class="notice">⚠️ 予算・情報は目安です。最新情報は各ホテルの公式サイトでご確認ください。</div>
+<div class="count-bar"><span id="hotel-count">0</span> 件表示中</div>
+
+<div id="hotel-container">
+
+<!-- ═══════════════ 北海道・東北 ═══════════════ -->
+<div class="region-section" data-region="北海道・東北">
+  <div class="region-title">北海道・東北</div>
+  <div class="hotel-grid">
+
+    <div class="hotel-card" data-region="北海道・東北" data-style="solo couple family" data-visited="false">
+      <div class="card-img-placeholder">📚</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ビジネス</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">ランプライトブックスホテル札幌</div>
+        <div class="card-location">北海道 札幌市</div>
+        <div class="card-price">¥10,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 4,000冊</div>
+        <div class="card-memo">旅とミステリーをテーマに4,000冊。24時間ブックカフェ併設。名古屋・福岡と3拠点展開。</div>
+        <div class="card-links"><a class="card-link" href="https://www.lamplightbookshotel.com/sapporo/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="北海道・東北" data-style="solo couple family" data-visited="false">
+      <div class="card-img-placeholder">🌲</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">リゾート</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">ホテル ナトゥールヴァルト富良野</div>
+        <div class="card-location">北海道 富良野市</div>
+        <div class="card-price">¥8,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">富良野スキー場隣接。2FのFURANO SHARE LOUNGEに『北の国から』関連本も。フリードリンク付き。子連れ歓迎。</div>
+        <div class="card-links"><a class="card-link" href="https://naturwald-furano.com/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="北海道・東北" data-style="solo couple family" data-visited="false">
+      <div class="card-img-placeholder">♨️</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">温泉リゾート</span><span class="tag tag-solo">Solo</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">芦別温泉スターライトホテル（おふろcafé星遊館）</div>
+        <div class="card-location">北海道 芦別市</div>
+        <div class="card-price">¥8,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 1,000冊以上</div>
+        <div class="card-memo">温泉×本の複合施設。「森の図書館」に豊富な蔵書。子連れ認定ルームあり。</div>
+        <div class="card-links"><a class="card-link" href="https://ofurocafe-seiyukan.com/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="北海道・東北" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">📖</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">温泉旅館</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">定山渓第一寶亭留翠山亭（風呂屋書店）</div>
+        <div class="card-location">北海道 札幌市 定山渓温泉</div>
+        <div class="card-price">¥40,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 2,500冊</div>
+        <div class="card-memo">2024年9月オープンの「風呂屋書店」内蔵。旅をテーマにした選書。売上は定山渓の植樹に還元する取り組みが素敵。</div>
+        <div class="card-links"><a class="card-link" href="https://suizantei.jp/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="北海道・東北" data-style="solo couple family" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">🌾</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ラグジュアリーリゾート</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">SUIDEN TERRASSE（スイデンテラス）</div>
+        <div class="card-location">山形県 鶴岡市</div>
+        <div class="card-price">¥25,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 2,000冊</div>
+        <div class="card-memo">坂茂設計の田んぼに浮かぶホテル。幅允孝セレクト2,000冊。隣のキッズドームソライにも800冊。食も自然も一流。</div>
+        <div class="card-links"><a class="card-link" href="https://www.suiden-terrasse.yamagata-design.com/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="北海道・東北" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">🌙</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">コミュニティホテル</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">月のホテル</div>
+        <div class="card-location">山形県 酒田市</div>
+        <div class="card-price">¥10,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 1,000冊</div>
+        <div class="card-memo">「第三の場所」をコンセプトにした酒田のコミュニティホテル。絵本・漫画・詩集など1,000冊。</div>
+        <div class="card-links"><a class="card-link" href="https://tsukinohotel.jp/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="北海道・東北" data-style="solo family" data-visited="false">
+      <div class="card-img-placeholder">🐐</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ビジネス</span><span class="tag tag-solo">Solo</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">ホテルフォルクローロ花巻東和</div>
+        <div class="card-location">岩手県 花巻市</div>
+        <div class="card-price">¥9,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">田園ホテル。岩手をテーマにした選書のブックラウンジ。ヤギとの触れ合いも楽しい。</div>
+        <div class="card-links"><a class="card-link" href="https://familio-folkloro.com/hanamakitowa/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="北海道・東北" data-style="solo couple family" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">☕</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ビジネス</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">コンフォートホテル（全国40拠点以上）</div>
+        <div class="card-location">全国（郡山・秋田・仙台 ほか）</div>
+        <div class="card-price">¥6,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 各店舗により異なる</div>
+        <div class="card-memo">全国40拠点以上でブックカフェを展開。無料朝食付きでコスパ最高。郡山は宿泊済み。</div>
+        <div class="card-links"><a class="card-link" href="https://www.choice-hotels.jp/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="北海道・東北" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">🏔️</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">リゾート</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">裏磐梯高原ホテル</div>
+        <div class="card-location">福島県 耶麻郡 北塩原村</div>
+        <div class="card-price">¥20,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 1,600冊</div>
+        <div class="card-memo">1953年開業の歴史あるリゾート。宿泊者限定ライブラリーラウンジから湖・森を望む。フリードリンク付き。</div>
+        <div class="card-links"><a class="card-link" href="https://urabandai-kougen.com/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="北海道・東北" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">🏮</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ビジネス</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">ハタゴイン福島広野</div>
+        <div class="card-location">福島県 双葉郡 広野町</div>
+        <div class="card-price">¥7,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明（漫画・雑誌中心）</div>
+        <div class="card-memo">現代の旅籠コンセプト。漫画・雑誌読み放題ライブラリー。スタイリッシュな客室でコスパよく読書ステイ。</div>
+        <div class="card-links"><a class="card-link" href="https://www.hatagoinn.com/hfh/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ 関東 ═══════════════ -->
+<div class="region-section" data-region="関東">
+  <div class="region-title">関東</div>
+  <div class="hotel-grid">
+
+    <div class="hotel-card" data-region="関東" data-style="solo couple" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">📚</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ラグジュアリー</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">芝パークホテル</div>
+        <div class="card-location">東京都 港区 芝公園</div>
+        <div class="card-price">¥30,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 12,000冊</div>
+        <div class="card-memo">「人・街・歴史をつなぐLibrary Hotel」。1.2万冊すべて購入可。著名人の「あの人の本箱」が充実。</div>
+        <div class="card-links"><a class="card-link" href="https://www.shibaparkhotel.com/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関東" data-style="solo" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">📖</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ビジネス</span><span class="tag tag-solo">Solo</span></div>
+        <div class="card-name">BOOK HOTEL 神保町</div>
+        <div class="card-location">東京都 千代田区 神保町</div>
+        <div class="card-price">¥12,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 フロアごとにテーマ別</div>
+        <div class="card-memo">本の街・神保町の12階建て。有料ブックマッチングサービスあり。各フロアにテーマ別選書。</div>
+        <div class="card-links"><a class="card-link" href="https://bookhoteljimbocho.com/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関東" data-style="solo" data-visited="false">
+      <div class="card-img-placeholder">🛏️</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ホステル</span><span class="tag tag-solo">Solo</span></div>
+        <div class="card-name">Bed And Book Tokyo</div>
+        <div class="card-location">東京都</div>
+        <div class="card-price">¥5,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">都内展開のブックホステル。読書特化のリーズナブルな選択肢。</div>
+        <div class="card-links"></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関東" data-style="solo couple" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">📕</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ビジネス</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">リッチモンドホテル プレミア東京スコーレ</div>
+        <div class="card-location">東京都</div>
+        <div class="card-price">¥20,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">ブックルーム設定あり。都心にいながら読書に特化した滞在ができる。</div>
+        <div class="card-links"><a class="card-link" href="https://richmondhotel.jp/tokyoschole/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関東" data-style="solo couple family" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">☕</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ビジネス</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">コンフォートホテル神田</div>
+        <div class="card-location">東京都 千代田区 神田</div>
+        <div class="card-price">¥8,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">ブックカフェ付きで無料朝食も。コスパ重視の東京ブックステイ。</div>
+        <div class="card-links"><a class="card-link" href="https://www.choice-hotels.jp/hotel/kanda/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関東" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">✈️</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ビジネス</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">クインテッサホテル東京羽田 Comic & Books</div>
+        <div class="card-location">東京都 大田区 蒲田</div>
+        <div class="card-price">¥14,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 漫画多数</div>
+        <div class="card-memo">漫画・カレー・うどん24時間食べ放題のユニークなホテル。羽田の前泊・後泊にも便利。</div>
+        <div class="card-links"><a class="card-link" href="https://quintessahotels.com/tokyo-haneda/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関東" data-style="solo" data-visited="false">
+      <div class="card-img-placeholder">🏛️</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ホステル</span><span class="tag tag-solo">Solo</span></div>
+        <div class="card-name">LIBRARY & HOSTEL BUSOAN武相庵</div>
+        <div class="card-location">東京都</div>
+        <div class="card-price">¥5,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">ライブラリー付きホステル。リーズナブルに読書ステイが叶う都内の隠れ家。</div>
+        <div class="card-links"></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関東" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">🏯</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ラグジュアリー</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">ホテル龍名館お茶の水本店</div>
+        <div class="card-location">東京都 千代田区 神田駿河台</div>
+        <div class="card-price">¥40,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">1899年創業、全9室のジャパニーズスイート。2Fライブラリーラウンジに書籍コーディネーター選書。お茶テーマのレストランも。</div>
+        <div class="card-links"><a class="card-link" href="https://www.ryumeikan-honten.jp/" target="_blank">公式HP</a></div>
+        <div class="card-links" style="margin-top:6px"><a class="card-link yt" href="https://youtu.be/s6U4YRTh84w?si=G9PVq1pTCLqPWar0" target="_blank">▶ YouTube</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関東" data-style="solo couple family" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">🌿</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">サステナブルリゾート</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">クルックフィールズ</div>
+        <div class="card-location">千葉県 木更津市</div>
+        <div class="card-price">¥17,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 3,400冊</div>
+        <div class="card-memo">小林武史プロデュース。中村拓志設計の「地中図書館」に3,400冊。農場・アート・食も一流。cocoon/タイニーハウスで宿泊。</div>
+        <div class="card-links"><a class="card-link" href="https://kurkkufields.jp/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関東" data-style="solo couple family" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">🏔️</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">温泉旅館（オールインクルーシブ）</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">箱根ゆとわ</div>
+        <div class="card-location">神奈川県 箱根町 強羅</div>
+        <div class="card-price">¥30,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 700冊</div>
+        <div class="card-memo">オールインクルーシブの温泉旅館。ライブラリーラウンジ700冊、焚火・足湯・キッズエリアも。</div>
+        <div class="card-links"><a class="card-link" href="https://www.hakoneyutowa-hotel.jp/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関東" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">📚</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ラグジュアリー</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">箱根本箱</div>
+        <div class="card-location">神奈川県 箱根町 強羅</div>
+        <div class="card-price">¥50,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 12,000冊</div>
+        <div class="card-memo">雑誌『自遊人』運営。1.2万冊すべて購入可の日本初「本が買えるホテル」。全室露天風呂・テレビなし。</div>
+        <div class="card-links"><a class="card-link" href="https://hakonehonbako.com/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関東" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">🌿</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">リトリート</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">湯河原リトリートご縁の杜</div>
+        <div class="card-location">神奈川県 足柄下郡 湯河原町</div>
+        <div class="card-price">¥25,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 1,500冊</div>
+        <div class="card-memo">「本来の自分に還る旅」。ヴィーガン料理×1,500冊の図書館。人生の転機に訪れたい宿。</div>
+        <div class="card-links"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ 中部・北陸 ═══════════════ -->
+<div class="region-section" data-region="中部・北陸">
+  <div class="region-title">中部・北陸</div>
+  <div class="hotel-grid">
+
+    <div class="hotel-card" data-region="中部・北陸" data-style="solo couple family" data-visited="false">
+      <div class="card-img-placeholder">🌊</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">リゾート</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">リゾナーレ熱海</div>
+        <div class="card-location">静岡県 熱海市</div>
+        <div class="card-price">¥30,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 1,000冊</div>
+        <div class="card-memo">最上階「ソラノビーチ Books & Cafe」で海を眺めながら読書。ツリーハウス・アスレチックも充実。</div>
+        <div class="card-links"><a class="card-link" href="https://hoshinoresorts.com/ja/hotels/risonareatami/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="中部・北陸" data-style="solo couple family" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">🏕️</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">リゾート</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">リゾナーレ八ヶ岳</div>
+        <div class="card-location">山梨県 北杜市 小淵沢</div>
+        <div class="card-price">¥35,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">「ブックス＆カフェ」は宿泊者以外も利用可。自然・アートから育児書まで幅広い選書。</div>
+        <div class="card-links"><a class="card-link" href="https://hoshinoresorts.com/ja/hotels/risonareyatsugatake/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="中部・北陸" data-style="couple" data-visited="false">
+      <div class="card-img-placeholder">🍷</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">高級旅館</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">坐忘（笛吹川温泉）</div>
+        <div class="card-location">山梨県 甲州市 塩山</div>
+        <div class="card-price">¥70,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">山梨の高級旅館。離れ露天風呂付き。ライブラリーに山梨・ワイン・懐石の蔵書。ワインも楽しめる。</div>
+        <div class="card-links"><a class="card-link" href="http://www.fuefukigawaonsen.com/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="中部・北陸" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">📚</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">温泉旅館</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">蓼科親湯温泉</div>
+        <div class="card-location">長野県 茅野市 蓼科高原</div>
+        <div class="card-price">¥20,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 30,000冊</div>
+        <div class="card-memo">文人ゆかりの宿。壁一面の「岩波文庫の回廊」3万冊が圧巻。大正レトロな雰囲気で読書に没頭。</div>
+        <div class="card-links"><a class="card-link" href="https://www.tateshina-shinyu.com/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="中部・北陸" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">🏛️</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">歴史旅館</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">枡一客殿（小布施）</div>
+        <div class="card-location">長野県 上高井郡 小布施町</div>
+        <div class="card-price">¥30,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">江戸時代の蔵を改築。文書蔵がそのままライブラリーに。24時間利用・部屋持ち込みOK。葛飾北斎の街・小布施散策も。</div>
+        <div class="card-links"><a class="card-link" href="https://www.kyakuden.jp/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="中部・北陸" data-style="solo couple family" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">📖</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ラグジュアリー</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">松本本箱（松本十帖）</div>
+        <div class="card-location">長野県 松本市 浅間温泉</div>
+        <div class="card-price">¥55,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 12,000冊</div>
+        <div class="card-memo">『自遊人』運営、1.2万冊すべて購入可。全室源泉かけ流し露天風呂。SUPPOSE DESIGN設計の緊張感ある空間。</div>
+        <div class="card-links">
+          <a class="card-link" href="https://matsumotojujo.com/" target="_blank">公式HP</a>
+          <a class="card-link yt" href="https://youtu.be/Ki_ZuUUPJoU?si=LJmNS3Cfo5ur98vf" target="_blank">▶ YouTube</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="中部・北陸" data-style="solo couple family" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">💡</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ビジネス</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">ランプライトブックスホテル名古屋</div>
+        <div class="card-location">愛知県 名古屋市 伏見</div>
+        <div class="card-price">¥14,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 3,000冊</div>
+        <div class="card-memo">旅×ミステリー3,000冊、24時間書店・カフェ付き。リーディングランプ＆ソファで読書特化客室。</div>
+        <div class="card-links"><a class="card-link" href="https://www.lamplightbookshotel.com/nagoya/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="中部・北陸" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">🍷</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ワイナリーリゾート</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">カーブドッチ</div>
+        <div class="card-location">新潟県 新潟市 西蒲区</div>
+        <div class="card-price">¥20,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 4,000冊</div>
+        <div class="card-memo">ワイナリー×温泉×本屋カフェ。スパ棟全体が本屋兼カフェで4,000冊。未就学児入場不可。</div>
+        <div class="card-links"><a class="card-link" href="https://cd-aveda.jp/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="中部・北陸" data-style="solo couple family" data-visited="false">
+      <div class="card-img-placeholder">⛷️</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">大型リゾート</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">ロッテアライリゾート</div>
+        <div class="card-location">新潟県 妙高市</div>
+        <div class="card-price">¥25,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">スキー・スパ・プールがある大型リゾート。重厚感のあるライブラリーに写真集など高級感ある蔵書。</div>
+        <div class="card-links"><a class="card-link" href="https://www.lottehotel.com/arai-resort/ja.html" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ 関西 ═══════════════ -->
+<div class="region-section" data-region="関西">
+  <div class="region-title">関西</div>
+  <div class="hotel-grid">
+
+    <div class="hotel-card" data-region="関西" data-style="solo couple" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">🏯</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">古民家ホテル</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">NIPPONIA播磨福崎 蔵書の館</div>
+        <div class="card-location">兵庫県 神崎郡 福崎町</div>
+        <div class="card-price">¥35,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 500冊</div>
+        <div class="card-memo">県指定重要有形文化財・三木家住宅（300年前）に宿泊。郵便局舎リノベの妖怪ブックカフェも。</div>
+        <div class="card-links">
+          <a class="card-link" href="https://nipponia-fukusaki.jp/" target="_blank">公式HP</a>
+          <a class="card-link yt" href="https://youtu.be/mrUzmZ320WA?si=2cXGw9K3VipZa9NV" target="_blank">▶ YouTube</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関西" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">♨️</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">温泉旅館</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">三木屋（城崎温泉）</div>
+        <div class="card-location">兵庫県 豊岡市 城崎</div>
+        <div class="card-price">¥35,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">創業300年、志賀直哉『城の崎にて』ゆかりの宿。国登録有形文化財。ライブラリーの選書にこだわり。</div>
+        <div class="card-links"><a class="card-link" href="https://www.kinosaki-mikiya.jp/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関西" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">♨️</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">温泉旅館</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">有馬温泉 陶泉 御所坊</div>
+        <div class="card-location">兵庫県 神戸市 北区 有馬</div>
+        <div class="card-price">¥40,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">1191年創業「有馬温泉最古の宿」。文化人ゆかりの館内にライブラリーサロン。日本三古湯の文学的空間。</div>
+        <div class="card-links"><a class="card-link" href="https://goshoboh.com/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関西" data-style="solo couple family" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">🎬</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ビジネス</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">TUNE STAY KYOTO</div>
+        <div class="card-location">京都府 京都市 下京区</div>
+        <div class="card-price">¥20,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 2,500冊</div>
+        <div class="card-memo">京都駅徒歩5分。大階段の壁一面に2,500冊。夜は15分のショートムービー上映。24時間閲覧可。</div>
+        <div class="card-links">
+          <a class="card-link" href="https://www.tune-stay.com/" target="_blank">公式HP</a>
+          <a class="card-link yt" href="https://youtu.be/CqkuuWAYB-0?si=-4OBBD9ZJYGxGToO" target="_blank">▶ YouTube</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関西" data-style="solo couple family" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">🌿</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">デザインホテル</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">梅小路ポテル京都</div>
+        <div class="card-location">京都府 京都市 下京区</div>
+        <div class="card-price">¥25,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">梅小路公園内。キッズスペース・ライブラリー・レコードルーム・ボードゲーム・銭湯の複合型。家族旅にも最高。</div>
+        <div class="card-links"><a class="card-link" href="https://www.potel.jp/kyoto/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関西" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">🏫</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ラグジュアリー</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">THE GATE HOTEL 京都高瀬川 by HULIC</div>
+        <div class="card-location">京都府 京都市 中京区</div>
+        <div class="card-price">¥25,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">100年の歴史を持つ立誠小学校跡地を再生。旧校舎の記憶を宿した空間設計が唯一無二。</div>
+        <div class="card-links"><a class="card-link" href="https://www.gate-hotel.jp/kyoto/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関西" data-style="family" data-visited="false">
+      <div class="card-img-placeholder">📕</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">絵本ホテル（1棟貸し）</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">EHONホテル</div>
+        <div class="card-location">奈良県 奈良市 学園前</div>
+        <div class="card-price">¥30,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明（世界の絵本中心）</div>
+        <div class="card-memo">2021年開業、1日1組限定64平米の絵本ホテル。イタリアを中心に世界の絵本が揃う。子どもが主役。</div>
+        <div class="card-links"></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="関西" data-style="solo couple" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">⛵</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">古民家ホテル</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">泊船 HAKUSEN</div>
+        <div class="card-location">三重県 伊賀市</div>
+        <div class="card-price">¥20,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">伊賀市の築100年古民家改修ブックホテル。選書のセンスが高く空間全体が本の世界観。忍者の里でひとり旅に最適。</div>
+        <div class="card-links">
+          <a class="card-link" href="https://hakusen.jp/" target="_blank">公式HP</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ 中国・四国 ═══════════════ -->
+<div class="region-section" data-region="中国・四国">
+  <div class="region-title">中国・四国</div>
+  <div class="hotel-grid">
+
+    <div class="hotel-card" data-region="中国・四国" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">⛩️</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">高級旅館</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">石庭（宮浜温泉）</div>
+        <div class="card-location">広島県 廿日市市 宮浜温泉</div>
+        <div class="card-price">¥35,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">12室の日本庭園旅館。宮島・瀬戸の海を望む天然温泉付き。「吸吐（スーパー）文庫」のネーミングがユニーク。</div>
+        <div class="card-links"><a class="card-link" href="https://www.sekitei.to/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="中国・四国" data-style="solo couple" data-visited="true">
+      <div class="visited-badge">✓ 訪問済み</div>
+      <div class="card-img-placeholder">🌸</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ブックホテル（複合施設）</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">ねをはす Book & Hotel</div>
+        <div class="card-location">山口県 下関市</div>
+        <div class="card-price">¥12,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 20,000冊</div>
+        <div class="card-memo">2024年11月開業の7階建て複合施設。2万冊の書店が21時〜翌5時まで宿泊者専用「夜の本屋」に。全室独立バス。</div>
+        <div class="card-links">
+          <a class="card-link" href="https://neohas.jp/" target="_blank">公式HP</a>
+          <a class="card-link yt" href="https://youtu.be/L0mSKXG5A6Y?si=RaeR9vVUdRdYqF2e" target="_blank">▶ YouTube</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="中国・四国" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">🌊</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">古民家（泊まれる図書館）</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">うみの図書館</div>
+        <div class="card-location">香川県 さぬき市 津田</div>
+        <div class="card-price">¥8,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明（海と沿岸文学中心）</div>
+        <div class="card-memo">瀬戸内の港町にある古民家改装の泊まれる図書館。日本百選の浜・津田の松原まで徒歩30秒。海×本が融合。</div>
+        <div class="card-links"><a class="card-link" href="https://www.chillnn.com/188bdac78d3133" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ 九州・沖縄 ═══════════════ -->
+<div class="region-section" data-region="九州・沖縄">
+  <div class="region-title">九州・沖縄</div>
+  <div class="hotel-grid">
+
+    <div class="hotel-card" data-region="九州・沖縄" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">📚</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ビジネス</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">BUNSHODO HOTEL</div>
+        <div class="card-location">福岡県 福岡市 博多区</div>
+        <div class="card-price">¥12,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 300冊</div>
+        <div class="card-memo">老舗書店「文照堂」跡地。「本に泊まる」プランで選書書籍＋カフェドリンク付き。博多駅徒歩5分。</div>
+        <div class="card-links"><a class="card-link" href="https://ldhd.co.jp/bunshodo/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="九州・沖縄" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">🏢</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ラグジュアリー</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">THE BASICS FUKUOKA</div>
+        <div class="card-location">福岡県 福岡市 博多区</div>
+        <div class="card-price">¥25,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 5,000冊</div>
+        <div class="card-memo">元ハイアットリージェンシー跡地。高さ8mの本棚6本に5,000冊、42m吹き抜けロビーが圧巻。</div>
+        <div class="card-links"><a class="card-link" href="https://www.thebasics.jp/fukuoka/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="九州・沖縄" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">📕</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ビジネス</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">クインテッサホテル福岡天神 Comic & Books</div>
+        <div class="card-location">福岡県 福岡市 中央区 天神</div>
+        <div class="card-price">¥12,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 8,000冊（漫画）</div>
+        <div class="card-memo">8,000冊のマンガライブラリー（24時間無料）。大阪・京都・東京羽田にも系列あり。</div>
+        <div class="card-links"><a class="card-link" href="https://quintessahotels.com/fukuoka-tenjin/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="九州・沖縄" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">♨️</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">ロングステイ型プチホテル</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">B.B.C長湯</div>
+        <div class="card-location">大分県 竹田市 長湯温泉</div>
+        <div class="card-price">¥5,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 13,000冊</div>
+        <div class="card-memo">炭酸泉・長湯温泉の湯治宿。林の中の山岳図書館に1.3万冊。客室に文豪の名前が付く文学の宿。</div>
+        <div class="card-links"><a class="card-link" href="https://bbcnagayu.com/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="九州・沖縄" data-style="solo" data-visited="false">
+      <div class="card-img-placeholder">🏛️</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">古民家（泊まれる図書館）</span><span class="tag tag-solo">Solo</span></div>
+        <div class="card-name">暁（古湯温泉）</div>
+        <div class="card-location">佐賀県 佐賀市 古湯温泉</div>
+        <div class="card-price">¥15,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 不明</div>
+        <div class="card-memo">築110年古民家の泊まれる図書館。夜は1日1組限定で図書館を独り占め。推薦者のBEST20冊が並ぶ唯一無二の選書。</div>
+        <div class="card-links"></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="九州・沖縄" data-style="solo couple family" data-visited="false">
+      <div class="card-img-placeholder">🏝️</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">エンターテイメントリゾート</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span><span class="tag tag-family">Family</span></div>
+        <div class="card-name">i+Land nagasaki</div>
+        <div class="card-location">長崎県 長崎市 伊王島</div>
+        <div class="card-price">¥15,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 10,000冊</div>
+        <div class="card-memo">伊王島のリゾートホテル。岩盤浴内ヒーリングラウンジに漫画・雑誌など約1万冊。家族・三世代旅にも。</div>
+        <div class="card-links"></div>
+      </div>
+    </div>
+
+    <div class="hotel-card" data-region="九州・沖縄" data-style="solo couple" data-visited="false">
+      <div class="card-img-placeholder">🌺</div>
+      <div class="card-body">
+        <div class="card-type-row"><span class="tag tag-type">古民家（一棟貸し）</span><span class="tag tag-solo">Solo</span><span class="tag tag-couple">Couple</span></div>
+        <div class="card-name">Book & Beach Hotel 浜比嘉別邸</div>
+        <div class="card-location">沖縄県 うるま市 浜比嘉島</div>
+        <div class="card-price">¥20,000〜 <span>/ 1泊1名</span></div>
+        <div class="card-books">📖 1,500冊</div>
+        <div class="card-memo">浜比嘉島の一棟貸し古民家。著者・永元深智氏が手がけ、全室に約1,500冊。日本百選の浜まで徒歩3分。</div>
+        <div class="card-links"><a class="card-link" href="https://www.hamahigabettei.com/" target="_blank">公式HP</a></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /hotel-container -->
+
+<footer>
+  <div class="footer-title">本とホテルとわたし時間</div>
+  <p style="margin-bottom:8px">さわあやが運営するブックホテル専門YouTubeチャンネル</p>
+  <a href="https://www.youtube.com/@bookhotel2401" target="_blank">YouTube チャンネルを見る</a>
+  <p style="margin-top:16px; font-size:11px; color:#4a4038">掲載情報は随時更新。情報提供・取材依頼はYouTubeコメントよりどうぞ。</p>
+</footer>
+
+<script>
+  const filters = { region: 'all', style: null, visited: null };
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.dataset.filter;
+      const val = btn.dataset.value;
+      if (type === 'region') {
+        document.querySelectorAll('[data-filter="region"]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filters.region = val;
+      } else if (type === 'style') {
+        if (btn.classList.contains('active')) { btn.classList.remove('active'); filters.style = null; }
+        else { document.querySelectorAll('[data-filter="style"]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); filters.style = val; }
+      } else if (type === 'visited') {
+        if (btn.classList.contains('active')) { btn.classList.remove('active'); filters.visited = null; }
+        else { btn.classList.add('active'); filters.visited = 'visited'; }
+      }
+      applyFilters();
+    });
+  });
+
+  function applyFilters() {
+    const cards = document.querySelectorAll('.hotel-card');
+    let count = 0;
+    cards.forEach(card => {
+      const regionOk = filters.region === 'all' || card.dataset.region === filters.region;
+      const styleOk  = !filters.style || card.dataset.style.includes(filters.style);
+      const visitedOk = !filters.visited || card.dataset.visited === 'true';
+      if (regionOk && styleOk && visitedOk) { card.classList.remove('hidden'); count++; }
+      else { card.classList.add('hidden'); }
+    });
+    document.querySelectorAll('.region-section').forEach(sec => {
+      sec.classList.toggle('hidden', sec.querySelectorAll('.hotel-card:not(.hidden)').length === 0);
+    });
+    document.getElementById('hotel-count').textContent = count;
+  }
+  applyFilters();
+</script>
+</body>
+</html>
