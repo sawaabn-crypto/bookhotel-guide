@@ -1308,8 +1308,13 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.classList.add('active');
       filters.region = val;
     } else if (type === 'visited') {
-      if (btn.classList.contains('active')) { btn.classList.remove('active'); filters.visited = null; }
-      else { btn.classList.add('active'); filters.visited = 'visited'; }
+      if (btn.classList.contains('active')) {
+        btn.classList.remove('active');
+        filters.visited = null;
+      } else {
+        btn.classList.add('active');
+        filters.visited = 'visited';
+      }
     }
     applyFilters();
   });
@@ -1318,14 +1323,23 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 function applyFilters() {
   let count = 0;
   document.querySelectorAll('.hotel-card').forEach(card => {
-    const ok = (filters.region === 'all' || card.dataset.region === filters.region)
-            && (!filters.visited || card.dataset.visited === 'true');
-    card.classList.toggle('hidden', !ok);
-    if (ok) count++;
+    const regionOk  = filters.region === 'all' || card.dataset.region === filters.region;
+    const visitedOk = !filters.visited || card.dataset.visited === 'true';
+    const show = regionOk && visitedOk;
+    if (show) {
+      card.classList.remove('hidden');
+      count++;
+    } else {
+      card.classList.add('hidden');
+    }
   });
   document.querySelectorAll('.region-section').forEach(sec => {
-    sec.classList.toggle('hidden',
-      sec.querySelectorAll('.hotel-card:not(.hidden)').length === 0);
+    const visible = sec.querySelectorAll('.hotel-card:not(.hidden)').length;
+    if (visible === 0) {
+      sec.classList.add('hidden');
+    } else {
+      sec.classList.remove('hidden');
+    }
   });
   document.getElementById('hotel-count').textContent = count;
 }
